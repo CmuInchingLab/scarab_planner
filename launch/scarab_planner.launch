@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<launch>
+  <node pkg="scarab_planner" type="scarab_planner_node" name="planner" output = "screen"/>
+<!--   <node pkg="rviz" type="rviz" name="rviz"/> -->
+</launch>
