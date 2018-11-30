@@ -2,7 +2,7 @@
 #include <gazebo_msgs/ModelStates.h>
 #include <geometry_msgs/Point.h>
 #include <scarab_gazebo/PointArr.h>
-#include "planner_to_control/control.h"
+#include "scarab_gazebo/control.h"
 #include "std_msgs/Bool.h"
 
 using namespace std;
@@ -152,7 +152,7 @@ int main(int argc, char ** argv){
   goal.y = 0.2;
   c.setHeight(&goal);
 
-  ros::Publisher command = n.advertise<planner_to_control::control>("commands", 100);
+  ros::Publisher command = n.advertise<scarab_gazebo::control>("commands", 100);
   ros::Subscriber Location = n.subscribe("/gazebo/model_states", 10, &sendControlInput::getPos, &c); 
   
   ros::Publisher setConBool = n.advertise<std_msgs::Bool>("ControlBool", 100);
@@ -164,7 +164,7 @@ int main(int argc, char ** argv){
 
   while(ros::ok()){
 
-    planner_to_control::control msg;
+    scarab_gazebo::control msg;
 
 
     Point p1(-1.05,2);  //test points
