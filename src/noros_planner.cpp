@@ -46,6 +46,7 @@ struct State
 
 struct Action
 {
+	// Define your action Struct Here
 	char dir;
 	Action(char d):dir(d){}
 	friend ostream& operator<<(ostream& os, const Action* a)
@@ -57,6 +58,7 @@ struct Action
 
 struct Info
 {
+	// Define your Info struct Here
 	string info;
 	Info(){
 		this->info = "NO INFO MOFO";
@@ -98,14 +100,17 @@ public:
 
 double a_star_search::get_cost(State* current, State* next)
 {
+	// Call your custom cost function here 
 	return abs(current->x-next->x) + abs(current->y - next->y);
 }
 double a_star_search::get_heuristic(State* current,State* goal)
 {
+	// Call your custom heuristic function here
 	return abs(current->x-goal->x) + abs(current->y - goal->y);
 }
 bool a_star_search::get_successors(State* current, vector<tuple<State*,Action*,Info*>>& successors)
 {	
+	// Call your custom get successors here
 	double M = 5;
 	Info* I = new Info();
 
@@ -133,6 +138,7 @@ bool a_star_search::get_successors(State* current, vector<tuple<State*,Action*,I
 
 bool a_star_search::get_plan(State* start,State* goal, vector<tuple<State*,Action*,Info*>>& path)
 {
+	// Most Generic A Star Planner Ever
 	unordered_map<State*,double,StateHasher,StateComparator> cost_so_far;
 	priority_queue<pair<double, State*>> f_state;
 	f_state.push({get_heuristic(start,goal), start});
@@ -196,8 +202,11 @@ bool a_star_search::get_plan(State* start,State* goal, vector<tuple<State*,Actio
 	return false;
 }
 
+
 int main(){
 
+	// This is just a test for the Most Generic A Star Planner Ever on a 5X5 Grid
+	
 	State* start = new State(0,0,0);
 	State* goal = new State(4,4,0);		
 
@@ -208,7 +217,5 @@ int main(){
 	for(auto element:path)
 	{
 		cout<<get<0>(element)<<get<1>(element)<<"\n";
-	}
-
-	
+	}	
 }
