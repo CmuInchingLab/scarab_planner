@@ -59,6 +59,7 @@ struct Action
 struct Info
 {
 	// Define your Info struct Here
+
 	string info;
 	Info(){
 		this->info = "NO INFO MOFO";
@@ -139,8 +140,12 @@ bool a_star_search::get_successors(State* current, vector<tuple<State*,Action*,I
 bool a_star_search::get_plan(State* start,State* goal, vector<tuple<State*,Action*,Info*>>& path)
 {
 	// Most Generic A Star Planner Ever
-	unordered_map<State*,double,StateHasher,StateComparator> cost_so_far;
+	unordered_map<State*,double, StateHasher, StateComparator> cost_so_far;
+	// priority_queue<pair<double, State*>, vector< pair<double,State*> >, greater< pair<double,State*> > > f_state;
+	// priority_queue<pair<double, State*>, vector<double>, greater<double>> f_state;
+
 	priority_queue<pair<double, State*>> f_state;
+
 	f_state.push({get_heuristic(start,goal), start});
 	came_from[start] = make_tuple(nullptr,nullptr,nullptr);
 	cost_so_far[start] = 0;
@@ -159,7 +164,7 @@ bool a_star_search::get_plan(State* start,State* goal, vector<tuple<State*,Actio
 		// cout<<"Current Priority Queue Size = "<<f_state.size()<<"\n";
 		visited.insert(current);
 		if (*current == goal) 
-			{
+		{
 			while(get<0>(came_from[current])!=nullptr)
 			{
 				tuple<State*,Action*,Info*> step_tuple = came_from[current];
@@ -206,7 +211,7 @@ bool a_star_search::get_plan(State* start,State* goal, vector<tuple<State*,Actio
 int main(){
 
 	// This is just a test for the Most Generic A Star Planner Ever on a 5X5 Grid
-	
+
 	State* start = new State(0,0,0);
 	State* goal = new State(4,4,0);		
 
