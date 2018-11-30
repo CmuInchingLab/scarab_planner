@@ -95,13 +95,14 @@ public:
 	bool get_successors(State* current, vector<tuple<State*,Action*,Info*>>& successors);
 	bool get_plan(State* start,State* goal, vector<tuple<State*,Action*,Info*>>& path);
 };
+
 double a_star_search::get_cost(State* current, State* next)
 {
-	return (current->x-next->x + current->y - next->y);
+	return abs(current->x-next->x) + abs(current->y - next->y);
 }
 double a_star_search::get_heuristic(State* current,State* goal)
 {
-	return 0;
+	return abs(current->x-goal->x) + abs(current->y - goal->y);
 }
 bool a_star_search::get_successors(State* current, vector<tuple<State*,Action*,Info*>>& successors)
 {	
@@ -160,7 +161,6 @@ bool a_star_search::get_plan(State* start,State* goal, vector<tuple<State*,Actio
 				current = get<0>(step_tuple);
 			}
 			reverse(path.begin(),path.end());
-			cout<<"\n";
 			cout<<"GOAL REACHED!!!"<<"\n";
 			cout<<"Number of Expanded States = "<<visited.size()<<"\n";
 			return true;
@@ -186,7 +186,7 @@ bool a_star_search::get_plan(State* start,State* goal, vector<tuple<State*,Actio
 				{
 					cost_so_far[next_state] = new_cost;
 					double f_cost = new_cost + get_heuristic(next_state, goal);
-					f_state.push({f_cost,next_state});
+					f_state.push({-f_cost,next_state});
 					came_from[next_state] = make_tuple(current,next_action,next_info);
 				}
 			}
@@ -209,5 +209,6 @@ int main(){
 	{
 		cout<<get<0>(element)<<get<1>(element)<<"\n";
 	}
+
 	
 }
