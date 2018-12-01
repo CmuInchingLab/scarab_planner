@@ -94,7 +94,7 @@ struct Action
 struct Info
 {
 	// Define your Info struct Here
-	double turn radius;
+	double turn_radius;
 	double arc_length;
 	double transition_cost;
 	double diff_height;
@@ -117,8 +117,7 @@ public:
 	pose to_global_frame(const State* global_state, const State* relative_state);
 
 	// getting the global successors
-	bool get_global_successors(const State* global_state,
-							 vector<tuple<State*,Action*,Info*>> global_successors);
+	bool get_global_successors(const State* global_state,vector<tuple<State*,Action*,Info*>> global_successors);
 
 	// no need for edit functions, just create another LatticeMotion object
 	// get functions
