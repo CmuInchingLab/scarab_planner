@@ -17,7 +17,6 @@
 #include <sstream>
 #include <string>
 
-
 // ROS stuff
 #include "ros/ros.h"
 #include "std_msgs/String.h"
@@ -25,7 +24,8 @@
 // // Eigen stuff
 #include "Eigen/Dense"
 
-
+//kd-tree for getting z values
+#include "kd_tree.cpp"
 using namespace std;
 
 struct State
@@ -141,7 +141,7 @@ struct StateComparator
 // template<typename State,typename Action,typename Info>
 class a_star_search{
 public:
-	a_star_search();
+	KDTree* tree = new KDTree("/home/andrew/planning_ws/src/scarab_planner/victoria_crater.xyz");	
   	LatticeMotion* motion_handler = new LatticeMotion({1.0, 2.0, -2.0, -1.0}, 1.0);	
 	unordered_map<State*,tuple<State*,Action*,Info*>> came_from;
 	unordered_set<State*,StateHasher,StateComparator> visited;

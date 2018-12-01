@@ -5,7 +5,6 @@
 #include "scarab_gazebo/control.h"
 #include "std_msgs/Bool.h"
 #include "noros_planner.hpp"
-#include "kd_tree.hpp"
 
 using namespace std;
 

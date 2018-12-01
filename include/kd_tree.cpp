@@ -77,8 +77,12 @@ public:
     ~KDTree(){
         delete tree;
     }
-    double query(std::vector<double> query_pt){
+
+    // inputs: a query point (x,y)
+    // output: return z value at x,y or -1 (if tree wasn't construcuted)
+    double query(double q_x, double q_y){
         if (this->tree_built){
+            std::vector<double> query_pt = {q_x, q_y};
             const size_t num_results = 1;
             std::vector<size_t> ret_indexes(num_results);
             std::vector<double> out_dists_sqr(num_results);

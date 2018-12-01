@@ -81,8 +81,10 @@ bool LatticeMotion::get_global_successors(
 
 double a_star_search::get_cost(State* current, State* next)
 {
-	// Call your custom cost function here 
-	return abs(current->x-next->x) + abs(current->y - next->y);
+	//TODO: add interpolation with table once Karen gets times for inching
+	//return the height diference between current and next state
+	return abs(tree->query(current->x, current->y) - tree->query(next->x, next->y));
+	// return abs(current->x-next->x) + abs(current->y - next->y);
 }
 double a_star_search::get_heuristic(State* current,State* goal)
 {
