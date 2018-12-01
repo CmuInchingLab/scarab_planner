@@ -80,6 +80,10 @@ struct Info
 		this->arc_length = a_l;
 		this->transition_cost = t_c;
 	}
+	string toString() const
+	{
+		return (to_string(this->x) + " " + to_string(this->y) + " " + to_string(this->theta));
+	}
 
 };
 
