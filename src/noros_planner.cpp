@@ -97,12 +97,10 @@ struct Info
 	double turn_radius;
 	double arc_length;
 	double transition_cost;
-	double diff_height;
-	Info(double t_r = 0.0,double a_l = 0.0, double t_c =0.0, double d_h = 0.0){
+	Info(double t_r = 0.0,double a_l = 0.0, double t_c =0.0){
 		this->turn_radius = t_r;
 		this->arc_length = a_l;
 		this->transition_cost = t_c;
-		this->diff_height =d_h;
 	}
 
 };
@@ -337,9 +335,12 @@ bool a_star_search::get_plan(State* start,State* goal, vector<tuple<State*,Actio
 				double new_cost = cost_so_far[current] + get_cost(current, next_state);
 				if (cost_so_far.find(next_state) == cost_so_far.end() || new_cost < cost_so_far[next_state]) 
 				{
+
 					cost_so_far[next_state] = new_cost;
 					double f_cost = new_cost + get_heuristic(next_state, goal);
 					f_state.push({-f_cost,next_state});
+					
+					next_info->transition_cost = new_cost;
 					came_from[next_state] = make_tuple(current,next_action,next_info);
 				}
 			}
@@ -357,12 +358,12 @@ int main(){
 	State* start = new State(0,0,0);
 	State* goal = new State(4,4,0);		
 
-	// a_star_search* planner = new a_star_search();
-	// vector<tuple<State*,Action*,Info*>> path;
-	// planner->get_plan(start,goal,path);
-	// cout<<"Printing Plan"<<"\n";
-	// for(auto element:path)
-	// {
-	// 	cout<<get<0>(element)<<get<1>(element)<<"\n";
-	// }	
+	a_star_search* planner = new a_star_search();
+	vector<tuple<State*,Action*,Info*>> path;
+	planner->get_plan(start,goal,path);
+	cout<<"Printing Plan"<<"\n";
+	for(auto element:path)
+	{
+		cout<<get<0>(element)<<get<1>(element)<<"\n";
+	}	
 }
