@@ -71,33 +71,6 @@ struct Info
 		this->info = "NO INFO MOFO";
 	}
 };
-class LatticeMotion 
-{
-public:
-	tuple<State*,Action*,Info*> A;
-// 	LatticeMotion(const vector<double>& turn_radius, double arc_length);
-// 	~LatticeMotion();
-
-// 	// some math
-// 	State* get_after_motion_pose(double radius);
-// 	State* to_global_frame(const State* global_state, const State* relative_state);
-
-// 	// getting the global successors
-// 	bool get_global_successors(const State* global_state,vector<tuple<State*,Action*,Info*>> global_successors);
-
-// 	// no need for edit functions, just create another LatticeMotion object
-// 	// get functions
-// 	vector<double> get_radius() { return this->turn_radius_; }
-// 	int get_n_branches() { return this->turn_radius_.size() + 1; }
-// 	double get_arc_length() { return this->arc_length_; }
-
-// private:
-// 	vector<double> turn_radius_;
-// 	double arc_length_;
-
-// 	// populated in constructor
-// 	vector<tuple<State*,Action*,Info*>> relative_motion_primitives_;
-};
 
 struct StateHasher
 {
