@@ -24,12 +24,12 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 
-// Eigen stuff
+// // Eigen stuff
 #include "Eigen/Dense"
 
 #define MAX_COST 1e+15;
 using namespace std;
-using namespace Eigen;
+// using namespace Eigen;
 
 struct State
 {
@@ -59,11 +59,11 @@ struct State
 
 };
 
-// struct Action2
+// struct Action
 // {
 // 	// Define your action Struct Here
 // 	char dir;
-// 	Action2(char d):dir(d){}
+// 	Action(char d):dir(d){}
 // 	friend ostream& operator<<(ostream& os, const Action* a)
 // 	{
 // 		os << a->dir << " ";
@@ -82,11 +82,11 @@ struct Action
 	}
 };
 
-// struct Info2
+// struct Info
 // {
 // 	// Define your Info struct Here
 // 	string info;
-// 	Info2(){
+// 	Info(){
 // 		this->info = "NO INFO MOFO";
 // 	}
 // };
@@ -106,6 +106,7 @@ struct Info
 	}
 
 };
+
 class LatticeMotion 
 {
 public:
@@ -113,8 +114,8 @@ public:
 	~LatticeMotion();
 
 	// some math
-	pose get_after_motion_pose(double radius);
-	pose to_global_frame(const State* global_state, const State* relative_state);
+	State* get_after_motion_pose(double radius);
+	State* to_global_frame(const State* global_state, const State* relative_state);
 
 	// getting the global successors
 	bool get_global_successors(const State* global_state,vector<tuple<State*,Action*,Info*>> global_successors);
@@ -185,18 +186,19 @@ State* LatticeMotion::get_after_motion_pose(double radius) {
   double relative_x = radius * sin(this->arc_length_ / radius);
   double relative_y = radius - radius * cos(this->arc_length_ / radius);
   double relative_theta = this->arc_length_ / radius;
-  State* after_motion_pose = new State(relative_x, relative_y, theta);
+  State* after_motion_pose = new State(relative_x, relative_y, relative_theta);
   return after_motion_pose;
 }
 
 State* LatticeMotion::to_global_frame(const State* global_pose,
                                     const State* relative_pose) {
-  MatrixXd T(3, 3);
+
+  Eigen::MatrixXd T(3, 3);
   T << cos(global_pose->theta), -sin(global_pose->theta), global_pose->x,
       sin(global_pose->theta), cos(global_pose->theta), global_pose->y, 0, 0, 1;
-  Vector3d v(relative_pose->x, relative_pose->y, 1);
+  Eigen::Vector3d v(relative_pose->x, relative_pose->y, 1);
 
-  Vector3d v_next = T * v;
+  Eigen::Vector3d v_next = T * v;
 
   State* next_pose = new State(v_next(0),v_next(1),global_pose->theta + relative_pose->theta);
   return next_pose;
@@ -207,7 +209,7 @@ bool LatticeMotion::get_global_successors(
   global_successors.clear();
 
   // get the relative motion primitives in global frame
-  for (motion_primitive mp : relative_motion_primitives_) {
+  for (tuple<State*,Action*,Info*> mp : relative_motion_primitives_) {
   	State* global_p = this->to_global_frame(global_pose,get<0>(mp));
     global_successors.push_back(make_tuple(global_p,get<1>(mp),get<2>(mp) ) );
   }
@@ -356,19 +358,19 @@ bool LatticeMotion::get_global_successors(
 // }
 
 
-// int main(){
+int main(){
 
-// 	// This is just a test for the Most Generic A Star Planner Ever on a 5X5 Grid
+	// This is just a test for the Most Generic A Star Planner Ever on a 5X5 Grid
 
-// 	State* start = new State(0,0,0);
-// 	State* goal = new State(4,4,0);		
+	State* start = new State(0,0,0);
+	State* goal = new State(4,4,0);		
 
-// 	a_star_search* planner = new a_star_search();
-// 	vector<tuple<State*,Action*,Info*>> path;
-// 	planner->get_plan(start,goal,path);
-// 	cout<<"Printing Plan"<<"\n";
-// 	for(auto element:path)
-// 	{
-// 		cout<<get<0>(element)<<get<1>(element)<<"\n";
-// 	}	
-// }
+	// a_star_search* planner = new a_star_search();
+	// vector<tuple<State*,Action*,Info*>> path;
+	// planner->get_plan(start,goal,path);
+	// cout<<"Printing Plan"<<"\n";
+	// for(auto element:path)
+	// {
+	// 	cout<<get<0>(element)<<get<1>(element)<<"\n";
+	// }	
+}
