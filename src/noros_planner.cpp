@@ -1,137 +1,3 @@
-#pragma once
-
-#include <iostream>
-#include <fstream>
-#include <regex>
-#include <unordered_set>
-#include <set>
-#include <vector>
-#include <list>
-#include <unordered_map>
-#include <algorithm>
-#include <stdexcept>
-#include <queue>
-#include <utility>
-#include <tuple>
-#include <string>
-#include <cmath>
-#include <limits>
-#include <sstream>
-#include <string>
-
-
-// ROS stuff
-#include "ros/ros.h"
-#include "std_msgs/String.h"
-
-// // Eigen stuff
-#include "Eigen/Dense"
-
-#define MAX_COST 1e+15;
-using namespace std;
-// using namespace Eigen;
-
-struct State
-{
-	double x;
-	double y;
-	double theta;
-	State(double a,double b,double c):x(a), y(b), theta(c){}
-	
-	friend ostream& operator<<(ostream& os, const State* s)
-	{
-		os << s->toString() << " ";
-		return os;
-	}
-	
-	string toString() const
-	{
-		return (to_string(this->x) + " " + to_string(this->y) + " " + to_string(this->theta));
-	}
-	
-	bool operator==(const State* rhs) const
-	{ 
-		double x_tol = 1; double y_tol = 1; double theta_tol = 1e-3;
-		return ((abs(this->x - rhs->x) < x_tol) && 
-				(abs(this->y - rhs->y) < y_tol) && 
-				(abs(this->theta - rhs->theta) < theta_tol));		
-	}
-
-};
-
-// struct Action
-// {
-// 	// Define your action Struct Here
-// 	char dir;
-// 	Action(char d):dir(d){}
-// 	friend ostream& operator<<(ostream& os, const Action* a)
-// 	{
-// 		os << a->dir << " ";
-// 		return os;
-// 	}
-// };
-struct Action
-{
-	// Define your action Struct Here
-	uint8_t motion_index;
-	Action(uint8_t index):motion_index(index){}
-	friend ostream& operator<<(ostream& os, const Action* a)
-	{
-		os << to_string(a->motion_index) << " ";
-		return os;
-	}
-};
-
-// struct Info
-// {
-// 	// Define your Info struct Here
-// 	string info;
-// 	Info(){
-// 		this->info = "NO INFO MOFO";
-// 	}
-// };
-
-struct Info
-{
-	// Define your Info struct Here
-	double turn_radius;
-	double arc_length;
-	double transition_cost;
-	Info(double t_r = 0.0,double a_l = 0.0, double t_c =0.0){
-		this->turn_radius = t_r;
-		this->arc_length = a_l;
-		this->transition_cost = t_c;
-	}
-
-};
-
-class LatticeMotion 
-{
-public:
-	LatticeMotion(const vector<double>& turn_radius, double arc_length);
-	~LatticeMotion();
-
-	// some math
-	State* get_after_motion_pose(double radius);
-	State* to_global_frame(const State* global_state, const State* relative_state);
-
-	// getting the global successors
-	bool get_global_successors(const State* global_state,vector<tuple<State*,Action*,Info*>> global_successors);
-
-	// no need for edit functions, just create another LatticeMotion object
-	// get functions
-	vector<double> get_radius() { return this->turn_radius_; }
-	int get_n_branches() { return this->turn_radius_.size() + 1; }
-	double get_arc_length() { return this->arc_length_; }
-
-private:
-	vector<double> turn_radius_;
-	double arc_length_;
-
-	// populated in constructor
-	vector<tuple<State*,Action*,Info*>> relative_motion_primitives_;
-};
-
 LatticeMotion::LatticeMotion(const vector<double>& turn_radius,
                              double arc_length)
     : turn_radius_(turn_radius), arc_length_(arc_length) 
@@ -198,7 +64,7 @@ State* LatticeMotion::to_global_frame(const State* global_pose,
 }
 
 bool LatticeMotion::get_global_successors(
-    const State* global_pose, vector<tuple<State*,Action*,Info*>> global_successors) {
+    const State* global_pose, vector<tuple<State*,Action*,Info*>>& global_successors) {
   global_successors.clear();
 
   // get the relative motion primitives in global frame
@@ -208,39 +74,6 @@ bool LatticeMotion::get_global_successors(
   }
   return true;
 }
-
-struct StateHasher
-{
-	std::size_t operator()(const State* n) const
-	{
-
-		hash<string> hasher;
-		std::size_t seed = 3;
-		double x = n->x; double y = n->y; double theta = n->theta;
-		seed ^= hasher(to_string(n->x))     + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-		seed ^= hasher(to_string(n->y))     + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-		seed ^= hasher(to_string(n->theta)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-		return seed;
-	}
-};
-struct StateComparator
-{
-	bool operator()(const State* lhs, const State* rhs) const
-	{
-		return (*lhs == rhs);
-	}
-};
-
-// template<typename State,typename Action,typename Info>
-class a_star_search{
-public:
-	unordered_map<State*,tuple<State*,Action*,Info*>> came_from;
-	unordered_set<State*,StateHasher,StateComparator> visited;
-	double get_cost(State* current, State* next);
-	double get_heuristic(State* current,State* goal);
-	bool get_successors(State* current, vector<tuple<State*,Action*,Info*>>& successors);
-	bool get_plan(State* start,State* goal, vector<tuple<State*,Action*,Info*>>& path);
-};
 
 double a_star_search::get_cost(State* current, State* next)
 {
@@ -255,29 +88,7 @@ double a_star_search::get_heuristic(State* current,State* goal)
 bool a_star_search::get_successors(State* current, vector<tuple<State*,Action*,Info*>>& successors)
 {	
 	// Call your custom get successors here
-	double M = 5;
-	Info* I = new Info();
-
-	vector<vector<double>> dirs = {{-1,0},{0,1},{1,0},{0,-1}};
-	vector<char> actions = {'N','E','S','W'};
-	for(int i=0;i<4;++i){
-		Action* A = new Action(actions[i]);
-		// cout<<dirs[i][0];
-		// cout<<min(max(current->x+dirs[i][0],0.0),M-1);
-		// cout<<min(max(current->y+dirs[i][1],0.0),M-1);
-		State* S = new State(min(max(current->x+dirs[i][0],0.0),M-1),min(max(current->y+dirs[i][1],0.0),M-1),0.0);
-
-		if(*current == S)
-		{
-			continue;
-		}
-		else
-		{
-			successors.push_back(make_tuple(S,A,I));
-		}
-	}
-	if(successors.size()){return true;}
-	return false;
+	return motion_handler->get_global_successors(current,successors);
 }
 
 bool a_star_search::get_plan(State* start,State* goal, vector<tuple<State*,Action*,Info*>>& path)
