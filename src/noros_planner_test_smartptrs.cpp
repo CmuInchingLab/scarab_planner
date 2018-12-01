@@ -48,8 +48,7 @@ bool a_star_search::get_plan(shared_ptr<State>& start,shared_ptr<State>& goal, v
 	priority_queue<pair<double, shared_ptr<State>>> f_state;
 
 	f_state.push({get_heuristic(start,goal), start});
-	shared_ptr<State> s_nullptr(nullptr);
-	came_from[start] = make_tuple(s_nullptr,nullptr,nullptr);
+	came_from[start] = make_tuple(nullptr,nullptr,nullptr);
 	cost_so_far[start] = 0;
 	unordered_set<shared_ptr<State>,StateHasher,StateComparator> visited;
 
