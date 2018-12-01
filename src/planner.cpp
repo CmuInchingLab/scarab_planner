@@ -105,7 +105,7 @@ class sendControlInput
 
 public:
   geometry_msgs::Point currpos;
-  bool conBool;
+  bool conBool=0;
   void getPos(const gazebo_msgs::ModelStates& msg){
     //subscribe to the model states and check x y location 
     currpos = msg.pose[1].position;
@@ -146,6 +146,12 @@ int main(int argc, char **argv){
   vector<tuple<State*,Action*,Info*>> path;
   planner->get_plan(start,goalfinal,path);
   int goalindex = 0 ;
+
+  cout<<"Printing Plan"<<"\n";
+  for(auto element:path)
+  {
+    cout<<get<0>(element)<<get<1>(element)<<get<1>(element)<<"\n";
+  }
 
   //vector<State> plan;
   //need to get plan maybe make a vector or whatever then give me?
@@ -188,6 +194,8 @@ int main(int argc, char **argv){
     msg.turn = commandnow;
     msg.inching = (get<2>(path[goalindex]))->transition_cost; //this will need some multiplier
     command.publish(msg);
+
+    cout << "GOAL INDEX" << goalindex <<'\n';
 
     //general ROS Stuff
     ros::spinOnce();

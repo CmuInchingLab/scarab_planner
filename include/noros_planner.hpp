@@ -141,7 +141,7 @@ struct StateComparator
 // template<typename State,typename Action,typename Info>
 class a_star_search{
 public:
-	a_star_search();
+	//a_star_search();
   	LatticeMotion* motion_handler = new LatticeMotion({1.0, 2.0, -2.0, -1.0}, 1.0);	
 	unordered_map<State*,tuple<State*,Action*,Info*>> came_from;
 	unordered_set<State*,StateHasher,StateComparator> visited;

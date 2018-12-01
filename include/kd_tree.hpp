@@ -117,11 +117,4 @@ void readFile(my_vector_of_vectors_t &point_cloud, const std::string &fname){
 	}
 	std::cout << "DONE READING " << fname << std::endl;
 }	
-int main()
-{
-	std::vector<std::vector<double>> point_cloud;
-	readFile(point_cloud, "victoria_crater.xyz");
-	// Randomize Seed
-	// srand(static_cast<unsigned int>(time(nullptr)));
-	kdtree_demo(point_cloud /* samples */, SAMPLES_DIM /* dim */);
-}
+
