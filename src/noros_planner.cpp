@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <fstream>
 #include <regex>
@@ -12,6 +14,18 @@
 #include <utility>
 #include <tuple>
 #include <string>
+#include <cmath>
+#include <limits>
+#include <sstream>
+#include <string>
+
+
+// ROS stuff
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+
+// Eigen stuff
+#include "Eigen/Dense"
 
 #define MAX_COST 1e+15;
 using namespace std;
