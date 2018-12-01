@@ -4,6 +4,8 @@
 #include <scarab_gazebo/PointArr.h>
 #include "scarab_gazebo/control.h"
 #include "std_msgs/Bool.h"
+#include "noros_planner.hpp"
+#include "kd_tree.hpp"
 
 using namespace std;
 
@@ -56,7 +58,15 @@ public:
 
   }
 
-  double getCost(vector<Point> pts){ //need to send a vector of two points 
+
+  //pointers to states,
+
+  double getCost(State* current, State* goal){ //need to send a vector of two points 
+    
+    Point p1(current->x,current->y);  //test points
+    Point p2(goal->x, goal->y);
+    vector<Point> pts = {p1,p2};
+
     requestZ(pts);
 
     cout << "GOT MSG" << got_msg << '\n';
@@ -64,8 +74,9 @@ public:
       ros::spinOnce();
    }
     double diff = received.points[0].z - received.points[1].z;
-  return diff;
-  }
+    return diff;
+  } 
+
   // Callback for getting array of Z coordinates given X and Y coordinates
   void receiveZ(const scarab_gazebo::PointArr receivedPts){
       // print out coordinates for debugging
@@ -94,7 +105,7 @@ class sendControlInput
 
 public:
   geometry_msgs::Point currpos;
-  bool currBool;
+  bool conBool;
   void getPos(const gazebo_msgs::ModelStates& msg){
     //subscribe to the model states and check x y location 
     currpos = msg.pose[1].position;
@@ -103,7 +114,7 @@ public:
 
   void getControlBool(const std_msgs::Bool& msg){
     //subscribe to the model states and check x y location 
-    currBool = msg.data;
+    conBool = msg.data;
 
   }
 
@@ -114,51 +125,45 @@ public:
 
   }
 
-  void setHeight(geometry_msgs::Point* goal){
-    
-    //get the height somehow maybe kd tree now? 
-    //Or get Andrew's planner class to send and request z for the x,y
-    goal->z= 16;
-
-  }
-
-  double getInching(geometry_msgs::Point goal){ //get inching between curr and goal
-    
-    double diff;
-    if(goal.z > currpos.z){
-      diff = goal.z - currpos.z;
-    }
-    else diff = 0; //no inching needed. 
-    return 2*diff; //some linear proportion of difference
-
-  }
 };
 
 
 
-int main(int argc, char ** argv){
+int main(int argc, char **argv){
 
-  ros::init(argc, argv, "sendToControl");
+  ros::init(argc, argv, "scarab_planner");
   ros::NodeHandle n;
   Planner plan(&n);
+
+
+  //this is the a-star search from ricky's node
+
+  State* start = new State(0,0,0);
+  State* goalfinal = new State(4,4,0); 
+
+  // a_star_search a;
+  a_star_search* planner = new a_star_search();
+  vector<tuple<State*,Action*,Info*>> path;
+  planner->get_plan(start,goalfinal,path);
+  int goalindex = 0 ;
 
   //vector<State> plan;
   //need to get plan maybe make a vector or whatever then give me?
   //but I'll make up a message now 
   sendControlInput c;
+  int commandnow = 3; // the straight case is default
 
-  geometry_msgs::Point goal;
-  goal.x = 0.2;
-  goal.y = 0.2;
-  c.setHeight(&goal);
-
+  //publisher for the controller node 
   ros::Publisher command = n.advertise<scarab_gazebo::control>("commands", 100);
+
+  //subsriber to get current location of robot from gazebo
   ros::Subscriber Location = n.subscribe("/gazebo/model_states", 10, &sendControlInput::getPos, &c); 
   
+  //publisher and subscriber to set/get a control bool parameter that says if controller is executing an action
   ros::Publisher setConBool = n.advertise<std_msgs::Bool>("ControlBool", 100);
   ros::Subscriber getConBool = n.subscribe("/ControlBool", 10, &sendControlInput::getControlBool, &c); 
   
-  bool nearGoal; 
+
   ros::Rate loop_rate(10);
   ros::Duration(1.5).sleep();
 
@@ -167,30 +172,24 @@ int main(int argc, char ** argv){
     scarab_gazebo::control msg;
 
 
-    Point p1(-1.05,2);  //test points
-      Point p2(2,3.14159);
-      vector<Point> pts = {p1,p2};
-    double cost = plan.getCost(pts);
-
-    // cout << "COST: " << cost << '\n';
-
-    if(c.currBool == 0){
+    //if the controller is not executing a task give it the next point in the plan 
+    if(c.conBool == 0){
       //get the next part of the plan
       std_msgs::Bool msgB;
       msgB.data = 1;
       setConBool.publish(msgB);
+
+     commandnow = (get<1>(path[goalindex]))->motion_index;
+     goalindex++;
     }
-    // cout << " CURR POSTION Z: " << c.currpos.z <<'\n';
-    // cout << " GOAL POSTION Z: " << goal.z <<'\n';
 
-    //test the message for the control node
 
-    //get the difference in heights and return inching
-
-    msg.turn = 0.4;
-    msg.inching = c.getInching(goal);
-
+    //this is the info sent to the control node. 
+    msg.turn = commandnow;
+    msg.inching = (get<2>(path[goalindex]))->transition_cost; //this will need some multiplier
     command.publish(msg);
+
+    //general ROS Stuff
     ros::spinOnce();
     loop_rate.sleep();
 
