@@ -27,7 +27,7 @@
  *************************************************************************/
 
 #include <nanoflann.hpp>
-using namespace nanoflann;
+// using namespace nanoflann;
 
 #include "KDTreeVectorOfVectorsAdaptor.h"
 
@@ -39,89 +39,146 @@ using namespace nanoflann;
 
 
 class KDTree{
+    typedef std::vector<std::vector<double> > my_vector_of_vectors_t;
+    typedef KDTreeVectorOfVectorsAdaptor< my_vector_of_vectors_t, double >  my_kd_tree_t;
+    
+    my_kd_tree_t *tree = NULL;
+    my_vector_of_vectors_t point_cloud;
+    size_t  dim = 3; 
+    bool tree_built = false;
+
+public:
+    KDTree(){}
     KDTree(std::string fname){
-        
+        //read in a line of x,y,z values from .xyz file
+        //https://stackoverflow.com/questions/7868936/read-file-line-by-line-using-ifstream-in-c
+        std::ifstream infile(fname);
+        if(!infile.fail()){
+ 
+            double x, y, z;
+            while (infile >> x >> y >> z){
+                // process pair (x,y,z)
+                std::vector<double> tuple{x,y,z};
+                this->point_cloud.push_back(tuple);
+
+                // print the numbers to stdout
+                // std::cout << x <<" " <<  y << " "<< z << std::endl;
+            }
+            std::cout << "DONE READING " << fname << std::endl;	
+            this->tree = new my_kd_tree_t(dim /*dim*/, this->point_cloud, 10 /* max leaf */ );
+            this->tree->index->buildIndex();
+            this->tree_built = true;
+        }
+        else{ //Error opening file
+            std::cout << "ERROR IN kd_tree.hpp! TREE NOT BUILT. CHECK IF "<< fname <<" IS NAMED CORRECTLY" << std::endl;
+        }
+
     }
+    ~KDTree(){
+        delete tree;
+    }
+    double query(std::vector<double> query_pt){
+        if (this->tree_built){
+            const size_t num_results = 1;
+            std::vector<size_t> ret_indexes(num_results);
+            std::vector<double> out_dists_sqr(num_results);
+
+            nanoflann::KNNResultSet<double> resultSet(num_results);
+
+            resultSet.init(&ret_indexes[0], &out_dists_sqr[0] );
+            //TODO: what does nanoflann::SearchParams(1) do???
+            this->tree->index->findNeighbors(resultSet, &query_pt[0], nanoflann::SearchParams(1)); 
+
+            // // std::cout << "knnSearch(nn="<<num_results<<"): \n";
+            // for (size_t i = 0; i < num_results; i++)
+            //     std::cout << "ret_index["<<i<<"]=" << ret_indexes[i] << " out_dist_sqr=" << out_dists_sqr[i] << std::endl;
+            // std::cout << "z val:" << samples[ret_indexes[0]][2] << std::endl;
+            std::cout << "index: " << ret_indexes[0] << std::endl;
+            return this->point_cloud[ret_indexes[0]][2];    //return z val
+        }
+        return -1;
+    }
+
 };
-const int SAMPLES_DIM = 3;
+// const int SAMPLES_DIM = 3;
 
-typedef std::vector<std::vector<double> > my_vector_of_vectors_t;
+// typedef std::vector<std::vector<double> > my_vector_of_vectors_t;
 
-// void generateRandomPointCloud(my_vector_of_vectors_t &samples, const size_t N, const size_t dim, const double max_range = 10.0)
+// // void generateRandomPointCloud(my_vector_of_vectors_t &samples, const size_t N, const size_t dim, const double max_range = 10.0)
+// // {
+// // 	std::cout << "Generating "<< N << " random points...";
+// // 	samples.resize(N);
+// // 	for (size_t i = 0; i < N; i++)
+// // 	{
+// // 		samples[i].resize(dim);
+// // 		for (size_t d = 0; d < dim; d++)
+// // 			samples[i][d] = max_range * (rand() % 1000) / (1000.0);
+// // 	}
+// // 	std::cout << "done\n";
+// // }
+
+// void kdtree_demo(/*const size_t nSamples*/ my_vector_of_vectors_t &samples, const size_t dim)
 // {
-// 	std::cout << "Generating "<< N << " random points...";
-// 	samples.resize(N);
-// 	for (size_t i = 0; i < N; i++)
-// 	{
-// 		samples[i].resize(dim);
-// 		for (size_t d = 0; d < dim; d++)
-// 			samples[i][d] = max_range * (rand() % 1000) / (1000.0);
-// 	}
-// 	std::cout << "done\n";
+// 	// my_vector_of_vectors_t  samples;
+
+// 	// const double max_range = 20;
+
+// 	// Generate points:
+// 	// generateRandomPointCloud(samples, nSamples,dim, max_range);
+
+// 	// Query point:
+// 	// std::vector<double> query_pt(dim);
+// 	// for (size_t d = 0;d < dim; d++){
+// 	// 	query_pt[d] = max_range * (rand() % 1000) / (1000.0);
+// 	// 	std::cout << query_pt[d] << " ";
+// 	// }
+// 	// std::cout << std::endl;
+// 	std::vector<double> query_pt{-138.05, 150.98};
+
+// 	// construct a kd-tree index:
+// 	// Dimensionality set at run-time (default: L2)
+// 	// ------------------------------------------------------------
+// 	typedef KDTreeVectorOfVectorsAdaptor< my_vector_of_vectors_t, double >  my_kd_tree_t;
+
+// 	my_kd_tree_t   mat_index(dim /*dim*/, samples, 10 /* max leaf */ );
+// 	mat_index.index->buildIndex();
+
+// 	// do a knn search
+// 	const size_t num_results = 1;
+// 	std::vector<size_t>  ret_indexes(num_results);
+// 	std::vector<double> out_dists_sqr(num_results);
+
+// 	nanoflann::KNNResultSet<double> resultSet(num_results);
+
+// 	resultSet.init(&ret_indexes[0], &out_dists_sqr[0] );
+// 	mat_index.index->findNeighbors(resultSet, &query_pt[0], nanoflann::SearchParams(1)); //TODO: what does nanoflann::SearchParams(1) do???
+
+// 	// std::cout << "knnSearch(nn="<<num_results<<"): \n";
+// 	for (size_t i = 0; i < num_results; i++)
+// 		std::cout << "ret_index["<<i<<"]=" << ret_indexes[i] << " out_dist_sqr=" << out_dists_sqr[i] << std::endl;
+// 	std::cout << "z val:" << samples[ret_indexes[0]][2] << std::endl;
 // }
 
-void kdtree_demo(/*const size_t nSamples*/ my_vector_of_vectors_t &samples, const size_t dim)
-{
-	// my_vector_of_vectors_t  samples;
+// void readFile(my_vector_of_vectors_t &point_cloud, const std::string &fname){
+// 	std::ifstream infile(fname);
+// 	//https://stackoverflow.com/questions/7868936/read-file-line-by-line-using-ifstream-in-c
+// 	//read in a line of x,y,z values from file
+// 	double x, y, z;
+// 	while (infile >> x >> y >> z){
+// 		// process pair (x,y,z)
+// 		std::vector<double> tuple{x,y,z};
+// 		point_cloud.push_back(tuple);
 
-	// const double max_range = 20;
-
-	// Generate points:
-	// generateRandomPointCloud(samples, nSamples,dim, max_range);
-
-	// Query point:
-	// std::vector<double> query_pt(dim);
-	// for (size_t d = 0;d < dim; d++){
-	// 	query_pt[d] = max_range * (rand() % 1000) / (1000.0);
-	// 	std::cout << query_pt[d] << " ";
-	// }
-	// std::cout << std::endl;
-	std::vector<double> query_pt{-138.05, 150.98};
-
-	// construct a kd-tree index:
-	// Dimensionality set at run-time (default: L2)
-	// ------------------------------------------------------------
-	typedef KDTreeVectorOfVectorsAdaptor< my_vector_of_vectors_t, double >  my_kd_tree_t;
-
-	my_kd_tree_t   mat_index(dim /*dim*/, samples, 10 /* max leaf */ );
-	mat_index.index->buildIndex();
-
-	// do a knn search
-	const size_t num_results = 1;
-	std::vector<size_t>  ret_indexes(num_results);
-	std::vector<double> out_dists_sqr(num_results);
-
-	nanoflann::KNNResultSet<double> resultSet(num_results);
-
-	resultSet.init(&ret_indexes[0], &out_dists_sqr[0] );
-	mat_index.index->findNeighbors(resultSet, &query_pt[0], nanoflann::SearchParams(1)); //TODO: what does nanoflann::SearchParams(1) do???
-
-	// std::cout << "knnSearch(nn="<<num_results<<"): \n";
-	for (size_t i = 0; i < num_results; i++)
-		std::cout << "ret_index["<<i<<"]=" << ret_indexes[i] << " out_dist_sqr=" << out_dists_sqr[i] << std::endl;
-	std::cout << "z val:" << samples[ret_indexes[0]][2] << std::endl;
-}
-
-void readFile(my_vector_of_vectors_t &point_cloud, const std::string &fname){
-	std::ifstream infile(fname);
-	//https://stackoverflow.com/questions/7868936/read-file-line-by-line-using-ifstream-in-c
-	//read in a line of x,y,z values from file
-	double x, y, z;
-	while (infile >> x >> y >> z){
-		// process pair (x,y,z)
-		std::vector<double> tuple{x,y,z};
-		point_cloud.push_back(tuple);
-
-		// print the numbers to stdout
-		// std::cout << x <<" " <<  y << " "<< z << std::endl;
-	}
-	std::cout << "DONE READING " << fname << std::endl;
-}	
-int main()
-{
-	std::vector<std::vector<double>> point_cloud;
-	readFile(point_cloud, "victoria_crater.xyz");
-	// Randomize Seed
-	// srand(static_cast<unsigned int>(time(nullptr)));
-	kdtree_demo(point_cloud /* samples */, SAMPLES_DIM /* dim */);
-}
+// 		// print the numbers to stdout
+// 		// std::cout << x <<" " <<  y << " "<< z << std::endl;
+// 	}
+// 	std::cout << "DONE READING " << fname << std::endl;
+// }	
+// // int main()
+// // {
+// // 	std::vector<std::vector<double>> point_cloud;
+// // 	readFile(point_cloud, "victoria_crater.xyz");
+// // 	// Randomize Seed
+// // 	// srand(static_cast<unsigned int>(time(nullptr)));
+// // 	kdtree_demo(point_cloud /* samples */, SAMPLES_DIM /* dim */);
+// // }
