@@ -59,17 +59,17 @@ struct State
 
 };
 
-struct Action2
-{
-	// Define your action Struct Here
-	char dir;
-	Action2(char d):dir(d){}
-	friend ostream& operator<<(ostream& os, const Action* a)
-	{
-		os << a->dir << " ";
-		return os;
-	}
-};
+// struct Action2
+// {
+// 	// Define your action Struct Here
+// 	char dir;
+// 	Action2(char d):dir(d){}
+// 	friend ostream& operator<<(ostream& os, const Action* a)
+// 	{
+// 		os << a->dir << " ";
+// 		return os;
+// 	}
+// };
 struct Action
 {
 	// Define your action Struct Here
@@ -82,14 +82,14 @@ struct Action
 	}
 };
 
-struct Info2
-{
-	// Define your Info struct Here
-	string info;
-	Info2(){
-		this->info = "NO INFO MOFO";
-	}
-};
+// struct Info2
+// {
+// 	// Define your Info struct Here
+// 	string info;
+// 	Info2(){
+// 		this->info = "NO INFO MOFO";
+// 	}
+// };
 
 struct Info
 {
