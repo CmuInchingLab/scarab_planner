@@ -71,7 +71,7 @@ void kdtree_demo(/*const size_t nSamples*/ my_vector_of_vectors_t &samples, cons
 	// 	std::cout << query_pt[d] << " ";
 	// }
 	// std::cout << std::endl;
-	// std::vector<double> query_pt{-138.05, 150.98};
+	std::vector<double> query_pt{-138.05, 150.98};
 
 	// construct a kd-tree index:
 	// Dimensionality set at run-time (default: L2)
