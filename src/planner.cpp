@@ -9,96 +9,6 @@
 
 using namespace std;
 
-struct Point{
-  float x;
-  float y;
-
-  Point(float x, float y){
-    this->x = x;
-    this->y = y;
-  }
-};
-
-class Planner{
-private:
-  ros::NodeHandle* n;
-
-  //handles the sending/receiving of messages to get Z value of map given an X and Y
-  int counter = 0;
-  ros::Publisher request_Z_pub;
-  ros::Subscriber receive_Z_sub;
-  scarab_gazebo::PointArr received; // received points 
-
-public:
-  bool got_msg = true;     //true if we received the last Z value we requested
-
-  Planner(ros::NodeHandle* nh){
-    n = nh;
-    request_Z_pub = n->advertise<scarab_gazebo::PointArr>("/scarab_gazebo/request_z", 100);
-    receive_Z_sub = n->subscribe("/scarab_gazebo/response_z", 100, &Planner::receiveZ, this);
-  }
-
-  //get Z values from Gazebo node
-  void requestZ(vector<Point> points){
-    while(!got_msg){  //wait until we've received previous message before sending this one  
-      // cout << "Waiting for message" << endl;
-      ros::spinOnce();
-    }
-    scarab_gazebo::PointArr query_pts;
-    query_pts.id = counter;
-    for (const auto& p: points){
-      geometry_msgs::Point query_p;
-      query_p.x = p.x;
-      query_p.y = p.y;
-      query_pts.points.push_back(query_p);
-    }
-    request_Z_pub.publish(query_pts);
-    got_msg = false;
-    // cout << "Requested Z values" << endl;
-
-  }
-
-
-  //pointers to states,
-
-  double getCost(State* current, State* goal){ //need to send a vector of two points 
-    
-    Point p1(current->x,current->y);  //test points
-    Point p2(goal->x, goal->y);
-    vector<Point> pts = {p1,p2};
-
-    requestZ(pts);
-
-    cout << "GOT MSG" << got_msg << '\n';
-    while(!got_msg){
-      ros::spinOnce();
-   }
-    double diff = received.points[0].z - received.points[1].z;
-    return diff;
-  } 
-
-  // Callback for getting array of Z coordinates given X and Y coordinates
-  void receiveZ(const scarab_gazebo::PointArr receivedPts){
-      // print out coordinates for debugging
-      if (receivedPts.id == counter){
-        cout << "POINT(S) RECEIVED!" << endl; 
-        for (const auto& rp: receivedPts.points){
-          cout << "X:" << rp.x << "  Y:" << rp.y << "  Z:" << rp.z << endl; 
-        }
-        counter++;
-        got_msg = true;
-        received = receivedPts;
-        //return receivedPts;
-      }
-      else{
-        // cout << "EXPECTED ID:" << counter << " BUT GOT:" << receivedPts.id << endl;
-        ROS_ERROR("ID errror in planner.cpp receiveZ( ): query points and received points don't match!");
-      }
-
-        
-  }
-};
-
 
 class sendControlInput
 {
@@ -133,8 +43,6 @@ int main(int argc, char **argv){
 
   ros::init(argc, argv, "scarab_planner");
   ros::NodeHandle n;
-  Planner plan(&n);
-
 
   //this is the a-star search from ricky's node
 
