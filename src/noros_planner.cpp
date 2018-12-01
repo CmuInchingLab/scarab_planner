@@ -1,3 +1,7 @@
+#include "noros_planner.hpp"
+
+double MAX_COST = 100000;
+
 LatticeMotion::LatticeMotion(const vector<double>& turn_radius,
                              double arc_length)
     : turn_radius_(turn_radius), arc_length_(arc_length) 
@@ -151,7 +155,7 @@ bool a_star_search::get_plan(State* start,State* goal, vector<tuple<State*,Actio
 					double f_cost = new_cost + get_heuristic(next_state, goal);
 					f_state.push({-f_cost,next_state});
 					
-					next_info->transition_cost = new_cost;
+					next_info->transition_cost = new_cost - cost_so_far[current];
 					came_from[next_state] = make_tuple(current,next_action,next_info);
 				}
 			}
@@ -162,19 +166,20 @@ bool a_star_search::get_plan(State* start,State* goal, vector<tuple<State*,Actio
 }
 
 
-int main(){
+// int main(){
 
-	// This is just a test for the Most Generic A Star Planner Ever on a 5X5 Grid
+// 	// This is just a test for the Most Generic A Star Planner Ever on a 5X5 Grid
 
-	State* start = new State(0,0,0);
-	State* goal = new State(4,4,0);		
+// 	State* start = new State(0,0,0);
+// 	State* goal = new State(4,4,0);		
 
-	a_star_search* planner = new a_star_search();
-	vector<tuple<State*,Action*,Info*>> path;
-	planner->get_plan(start,goal,path);
-	cout<<"Printing Plan"<<"\n";
-	for(auto element:path)
-	{
-		cout<<get<0>(element)<<get<1>(element)<<"\n";
-	}	
-}
+// 	a_star_search* planner = new a_star_search();
+// 	// vector<tuple<State*,Action*,Info*>> path;
+// 	// planner->get_plan(start,goal,path);
+// 	// cout<<"Printing Plan"<<"\n";
+// 	// for(auto element:path)
+// 	// {
+// 	// 	cout<<get<0>(element)<<get<1>(element)<<"\n";
+// 	// }	
+// 	return 0;
+// }
