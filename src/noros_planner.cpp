@@ -14,7 +14,7 @@ LatticeMotion::LatticeMotion(const vector<double>& turn_radius,
 	{
 	State* relative_p = this->get_after_motion_pose(radius);
 	Action* curr_action = new Action(curr_motion_index);
-	Info* curr_info = new Info(radius,this->arc_length_);
+	Info* curr_info = new Info(radius,this->arc_length_, 0.0, 0.0);
 	tuple<State*,Action*,Info*> relative_motion_mp = make_tuple(relative_p,curr_action,curr_info);
 	relative_motion_primitives_.push_back(relative_motion_mp);
 
@@ -25,7 +25,7 @@ LatticeMotion::LatticeMotion(const vector<double>& turn_radius,
 	{
 		State* relative_mid = new State(this->arc_length_,0,0);
 		Action* curr_action = new Action(curr_motion_index);
-		Info* curr_info = new Info(DBL_MAX,this->arc_length_);
+		Info* curr_info = new Info(DBL_MAX,this->arc_length_, 0.0, 0.0);
 		tuple<State*,Action*,Info*> relative_motion_mp = make_tuple(relative_mid, curr_action,curr_info);
 		relative_motion_primitives_.push_back(relative_motion_mp);
 		// go to the next branch
@@ -83,6 +83,9 @@ double a_star_search::get_cost(State* current, State* next)
 {
 	//TODO: add interpolation with table once Karen gets times for inching
 	//return the height diference between current and next state
+	// cout << "X_curr" << current->x << "Y_curr" << current->y << "Z_curr" << tree->query(current->x, current->y)  <<'\n';
+	// cout << "X_next" << next->x << "Y_next" <<  next->y << "Z_next" << tree->query(next->x, next->y)  << '\n';
+	// cout << "COST NOW" << abs(tree->query(current->x, current->y) - tree->query(next->x, next->y)) <<'\n';
 	return abs(tree->query(current->x, current->y) - tree->query(next->x, next->y));
 	// return abs(current->x-next->x) + abs(current->y - next->y);
 }
@@ -157,7 +160,11 @@ bool a_star_search::get_plan(State* start,State* goal, vector<tuple<State*,Actio
 					double f_cost = new_cost + get_heuristic(next_state, goal);
 					f_state.push({-f_cost,next_state});
 					
-					next_info->transition_cost = new_cost - cost_so_far[current];
+					next_info->transition_cost = get_cost(current, next_state);
+					next_info-> curr_z = tree->query(next_state->x, next_state->y);
+					cout << "X_next: " << next_state->x << "Y_next: " <<  next_state->y << "Z_next: " << next_info->curr_z  << '\n';
+					cout << "COST: " << next_info->transition_cost << '\n';
+
 					came_from[next_state] = make_tuple(current,next_action,next_info);
 				}
 			}

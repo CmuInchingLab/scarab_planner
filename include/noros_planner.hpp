@@ -75,10 +75,12 @@ struct Info
 	double turn_radius;
 	double arc_length;
 	double transition_cost;
-	Info(double t_r = 0.0,double a_l = 0.0, double t_c =0.0){
+	double curr_z;
+	Info(double t_r = 0.0,double a_l = 0.0, double t_c =0.0, double z=0.0){
 		this->turn_radius = t_r;
 		this->arc_length = a_l;
 		this->transition_cost = t_c;
+		this->curr_z = z;
 	}
 	// string toString() const
 	// {
@@ -141,7 +143,7 @@ struct StateComparator
 // template<typename State,typename Action,typename Info>
 class a_star_search{
 public:
-	KDTree* tree = new KDTree("/home/andrew/planning_ws/src/scarab_planner/victoria_crater.xyz");	
+	KDTree* tree = new KDTree("/home/divyak/Documents/Fall2018/Planning/Project/catkin_ws/src/scarab_planner/victoria_crater.xyz");	
   	LatticeMotion* motion_handler = new LatticeMotion({1.0, 2.0, -2.0, -1.0}, 1.0);	
 	unordered_map<State*,tuple<State*,Action*,Info*>> came_from;
 	unordered_set<State*,StateHasher,StateComparator> visited;

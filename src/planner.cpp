@@ -46,7 +46,7 @@ int main(int argc, char **argv){
   //this is the a-star search from ricky's node
 
   State* start = new State(0,0,0);
-  State* goalfinal = new State(4,4,0); 
+  State* goalfinal = new State(10,0,0); 
 
   // a_star_search a;
   a_star_search* planner = new a_star_search();
@@ -54,10 +54,16 @@ int main(int argc, char **argv){
   planner->get_plan(start,goalfinal,path);
   int goalindex = 0 ;
 
+  KDTree* tree = new KDTree("/home/divyak/Documents/Fall2018/Planning/Project/catkin_ws/src/scarab_planner/victoria_crater.xyz"); 
+
   cout<<"Printing Plan"<<"\n";
   for(auto element:path)
   {
-    cout<<get<0>(element)<<get<1>(element)<<get<1>(element)<<"\n";
+    path[0]
+    cout<<get<0>(element)<<get<1>(element)<<(get<2>(element))->transition_cost<<"\n";
+    
+    cout << "Z: from Info: " << (get<2>(element))->curr_z << '\n';
+    cout << "Query tree now: " << tree->query(get<0>(element)->x, get<0>(element)->y) <<'\n';
   }
 
   //vector<State> plan;
