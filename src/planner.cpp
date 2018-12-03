@@ -61,7 +61,6 @@ int main(int argc, char **argv){
   cout<<"Printing Plan"<<"\n";
   for(auto element:path)
   {
-    path[0]
     cout<<get<0>(element)<<get<1>(element)<<(get<2>(element))->transition_cost<<"\n";
     
     cout << "Z: from Info: " << (get<2>(element))->curr_z << '\n';
