@@ -9,7 +9,7 @@
 
   
   <!-- Convert an xacro and put on parameter server -->
-  <!-- <param name="robot_description" textfile="$(find scarab_description)/urdf/scarab.urdf" /> -->
+  <param name="robot_description" textfile="$(find scarab_description)/urdf/scarab.urdf" />
 
 
 

@@ -48,7 +48,7 @@ int main(int argc, char **argv){
   //this is the a-star search from ricky's node
 
   State* start = new State(0,0,0);
-  State* goalfinal = new State(10,0,0); 
+  State* goalfinal = new State(100,0,0); 
 
   // a_star_search a;
   a_star_search* planner = new a_star_search();
@@ -56,7 +56,7 @@ int main(int argc, char **argv){
   planner->get_plan(start,goalfinal,path);
   int goalindex = 0 ;
 
-  KDTree* tree = new KDTree("/home/divyak/Documents/Fall2018/Planning/Project/catkin_ws/src/scarab_planner/victoria_crater.xyz"); 
+  KDTree* tree = new KDTree("/home/andrew/planning_ws/src/scarab_planner/victoria_crater.xyz"); 
 
   cout<<"Printing Plan"<<"\n";
   for(auto element:path)
@@ -74,7 +74,7 @@ int main(int argc, char **argv){
   int commandnow = 3; // the straight case is default
 
   //publish to the visualization topic
-  ros::Publisher vis_pub = n.advertise<visualization_msgs::Marker>( "visualization_marker", 0 );
+  ros::Publisher vis_pub = n.advertise<visualization_msgs::Marker>( "visualization_marker", 10 );
 
   //publisher for the controller node 
   //ros::Publisher command = n.advertise<scarab_gazebo::control>("commands", 100);
@@ -95,15 +95,16 @@ int main(int argc, char **argv){
     //scarab_gazebo::control msg;
     visualization_msgs::Marker marker;
     // markers for visualization initialization
-    marker.header.frame_id = "world";
+    marker.header.frame_id = "base_link";
     marker.header.stamp = ros::Time();
     marker.ns = "scarab";
     marker.type = visualization_msgs::Marker::ARROW;
     marker.action = visualization_msgs::Marker::ADD;
     marker.scale.x = 1;
-    marker.scale.y = 1;
-    marker.scale.z = 1;
+    marker.scale.y = 0.2;
+    marker.scale.z = 0.2;
     marker.color.a = 1.0;
+    marker.color.r = 1.0;
     tf2::Quaternion quaternion_for_marker;
 
     if(goalindex < path.size()){
