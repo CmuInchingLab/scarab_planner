@@ -83,7 +83,7 @@ public:
     double query(double q_x, double q_y){
         if (this->tree_built){
             std::vector<double> query_pt = {q_x, q_y};
-            const size_t num_results = 1;
+            const size_t num_results = 5;
             std::vector<size_t> ret_indexes(num_results);
             std::vector<double> out_dists_sqr(num_results);
 
@@ -97,7 +97,8 @@ public:
             // for (size_t i = 0; i < num_results; i++)
             //     std::cout << "ret_index["<<i<<"]=" << ret_indexes[i] << " out_dist_sqr=" << out_dists_sqr[i] << std::endl;
             // std::cout << "z val:" << samples[ret_indexes[0]][2] << std::endl;
-            std::cout << "index: " << ret_indexes[0] << std::endl;
+            // std::cout << "index: " << ret_indexes[0] << std::endl;
+            //std::cout << "KD pt: [" << q_x << ", " << q_y << ", " << this->point_cloud[ret_indexes[0]][2] << "]    .xyz index: " << ret_indexes[0] << std::endl;
             return this->point_cloud[ret_indexes[0]][2];    //return z val
         }
         return -1;
