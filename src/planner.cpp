@@ -7,7 +7,8 @@
 #include "std_msgs/Bool.h"
 #include "noros_planner.hpp"
 #include <tf2/LinearMath/Quaternion.h>
-
+#include <algorithm>
+#include <vector>
 using namespace std;
 
 
@@ -37,6 +38,36 @@ public:
   }
 
 };
+
+// interpolates some value to RGB values between green (low) and red (high)
+// outputs vector: {red, green, blue}, between 0 to 255
+// max and min are inclusive
+vector<double> interpolate_green2red(double curr_value, double max_val,
+double min_val) {
+
+vector<double> rgb;
+double mid_point = (max_val - min_val) / 2.0 - min_val;
+
+if (curr_value - min_val <= mid_point) {
+rgb.clear();
+rgb.push_back(255);
+rgb.push_back((curr_value - min_val) * 255 / mid_point);
+rgb.push_back(0);
+} else {
+rgb.clear();
+rgb.push_back((max_val - curr_value) * 255 / mid_point);
+rgb.push_back(255);
+rgb.push_back(0);
+}
+
+// clip
+for (int i = 0; i < rgb.size(); i++) {
+if (min(rgb[i], 255.0) == 255.0) rgb[i] = 255;
+if (max(rgb[i], 0.0) == 0.0) rgb[i] = 0;
+}
+
+return rgb;
+}
 
 
 
@@ -113,6 +144,7 @@ int main(int argc, char **argv){
     tf2::Quaternion quaternion_for_marker;
 
     if(goalindex < path.size()){
+      // get quaternion based on theta
       quaternion_for_marker.setRPY( 0, 0, get<0>(path[goalindex])->theta);
       marker.id = goalindex;
       marker.pose.position.x = get<0>(path[goalindex])->x;
@@ -122,10 +154,18 @@ int main(int argc, char **argv){
       marker.pose.orientation.y = quaternion_for_marker[1];
       marker.pose.orientation.z = quaternion_for_marker[2];
       marker.pose.orientation.w = quaternion_for_marker[3];
-      marker.color.r = 0.0; //TODO Change this to be real r value based on cost
-      marker.color.g = 0.0; //TODO Change this to be real g value based on cost
-      marker.color.b = 0.0; //TODO Change this to be real b value based on cost
+
+      // use the inching to change the colors of the arrows
+      double curr_inching = (get<2>(path[goalindex]))->transition_cost; //this will need some multiplier
+      double max_val = 100; 
+      double min_val = 0;
+      vector<double> rgb =  interpolate_green2red(curr_inching, max_val, min_val);
+      marker.color.r = rgb[0]; 
+      marker.color.g = rgb[1]; 
+      marker.color.b = rgb[2]; 
       goalindex++;
+
+      //publish the marker
       vis_pub.publish(marker);
     }
 
