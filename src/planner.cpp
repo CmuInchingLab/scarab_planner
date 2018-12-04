@@ -155,9 +155,9 @@ int main(int argc, char **argv){
       double max_val = 100; 
       double min_val = 0;
       vector<double> rgb =  interpolate_green2red(curr_inching, max_val, min_val);
-      marker.color.r = rgb[0]; //TODO Change this to be real r value based on cost
-      marker.color.g = rgb[1]; //TODO Change this to be real g value based on cost
-      marker.color.b = rgb[2]; //TODO Change this to be real b value based on cost
+      marker.color.r = rgb[0]; 
+      marker.color.g = rgb[1]; 
+      marker.color.b = rgb[2]; 
       goalindex++;
 
       //publish the marker
