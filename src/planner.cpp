@@ -150,14 +150,17 @@ int main(int argc, char **argv){
       marker.pose.orientation.z = quaternion_for_marker[2];
       marker.pose.orientation.w = quaternion_for_marker[3];
 
+      // use the inching to change the colors of the arrows
       double curr_inching = (get<2>(path[goalindex]))->transition_cost; //this will need some multiplier
       double max_val = 100; 
       double min_val = 0;
       vector<double> rgb =  interpolate_green2red(curr_inching, max_val, min_val);
-      marker.color.r = 0.0; //TODO Change this to be real r value based on cost
-      marker.color.g = 0.0; //TODO Change this to be real g value based on cost
-      marker.color.b = 0.0; //TODO Change this to be real b value based on cost
+      marker.color.r = rgb[0]; //TODO Change this to be real r value based on cost
+      marker.color.g = rgb[1]; //TODO Change this to be real g value based on cost
+      marker.color.b = rgb[2]; //TODO Change this to be real b value based on cost
       goalindex++;
+
+      //publish the marker
       vis_pub.publish(marker);
     }
 
