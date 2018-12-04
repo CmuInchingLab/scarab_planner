@@ -164,7 +164,11 @@ bool a_star_search::get_plan(State* start,State* goal, vector<tuple<State*,Actio
 				{
 					cost_so_far[current] = MAX_COST;
 				}
-				double new_cost = cost_so_far[current] + get_cost(current, next_state);
+				int motion = next_action->motion_index; 
+				double costturn = 0.05;
+				if(motion == 1 || motion == 5) double costturn = 0.15;
+				if(motion == 2 || motion == 4) double costturn = 0.1;
+				double new_cost = cost_so_far[current] + get_cost(current, next_state) + costturn;
 				if (cost_so_far.find(next_state) == cost_so_far.end() || new_cost < cost_so_far[next_state]) 
 				{
 

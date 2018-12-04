@@ -51,7 +51,7 @@ struct State
 	
 	bool operator==(const State* rhs) const
 	{ 
-		double x_tol = 1; double y_tol = 1; double theta_tol = 1e-3; double z_tol = 1e-3;
+		double x_tol = 1; double y_tol = 1; double theta_tol = 0.25; double z_tol = 1e-3;
 		return ((abs(this->x - rhs->x) < x_tol) && 
 				(abs(this->y - rhs->y) < y_tol) && 
 				(abs(this->theta - rhs->theta) < theta_tol));		

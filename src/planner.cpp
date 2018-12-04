@@ -85,7 +85,7 @@ int main(int argc, char **argv){
 
 
   State* start = new State(0,0,0, tree);
-  State* goalfinal = new State(150, 100,0, tree); 
+  State* goalfinal = new State(120, 100,2, tree); 
 
 
   a_star_search* planner = new a_star_search();
