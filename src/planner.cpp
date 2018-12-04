@@ -47,24 +47,29 @@ int main(int argc, char **argv){
 
   //this is the a-star search from ricky's node
 
-  State* start = new State(0,0,0);
-  State* goalfinal = new State(100,0,0); 
 
-  // a_star_search a;
+  KDTree* tree = new KDTree("/home/divyak/Documents/Fall2018/Planning/Project/catkin_ws/src/scarab_planner/victoria_crater.xyz"); 
+  LatticeMotion* motion_handler = new LatticeMotion({1.0, 2.0, -2.0, -1.0}, 1.0,tree); 
+
+
+  State* start = new State(0,0,0, tree);
+  State* goalfinal = new State(20, 0,0, tree); 
+
+
   a_star_search* planner = new a_star_search();
   vector<tuple<State*,Action*,Info*>> path;
-  planner->get_plan(start,goalfinal,path);
+  planner->get_plan(start,goalfinal,path,tree,motion_handler);
   int goalindex = 0 ;
 
-  KDTree* tree = new KDTree("/home/andrew/planning_ws/src/scarab_planner/victoria_crater.xyz"); 
-
   cout<<"Printing Plan"<<"\n";
+
   for(auto element:path)
   {
-    cout<<get<0>(element)<<get<1>(element)<<(get<2>(element))->transition_cost<<"\n";
+    cout<<get<0>(element)<<get<1>(element)<<(get<2>(element))<<"\n";
     
-    cout << "Z: from Info: " << (get<2>(element))->curr_z << '\n';
+    cout << "Z: from State: " << (get<0>(element))->z<< '\n';
     cout << "Query tree now: " << tree->query(get<0>(element)->x, get<0>(element)->y) <<'\n';
+    cout << "Cost: " <<  get<2>(element)->transition_cost <<'\n';
   }
 
   //vector<State> plan;
@@ -112,7 +117,7 @@ int main(int argc, char **argv){
       marker.id = goalindex;
       marker.pose.position.x = get<0>(path[goalindex])->x;
       marker.pose.position.y = get<0>(path[goalindex])->y;
-      marker.pose.position.z = 0; //TODO Change this to be real z value
+      marker.pose.position.z =tree->query(get<0>(path[goalindex])->x, get<0>(path[goalindex])->y);
       marker.pose.orientation.x = quaternion_for_marker[0];
       marker.pose.orientation.y = quaternion_for_marker[1];
       marker.pose.orientation.z = quaternion_for_marker[2];

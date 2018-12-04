@@ -28,12 +28,15 @@
 #include "kd_tree.cpp"
 using namespace std;
 
+
 struct State
 {
 	double x;
 	double y;
+	double z;
 	double theta;
-	State(double a,double b,double c):x(a), y(b), theta(c){}
+
+	State(double a,double b, double c,KDTree* tree):x(a), y(b), theta(c), z(tree->query(a,b)){}
 	
 	friend ostream& operator<<(ostream& os, const State* s)
 	{
@@ -43,12 +46,12 @@ struct State
 	
 	string toString() const
 	{
-		return (to_string(this->x) + " " + to_string(this->y) + " " + to_string(this->theta));
+		return (to_string(this->x) + " " + to_string(this->y) + " " + to_string(this->z)+ " " + to_string(this->theta));
 	}
 	
 	bool operator==(const State* rhs) const
 	{ 
-		double x_tol = 1; double y_tol = 1; double theta_tol = 1e-3;
+		double x_tol = 1; double y_tol = 1; double theta_tol = 1e-3; double z_tol = 1e-3;
 		return ((abs(this->x - rhs->x) < x_tol) && 
 				(abs(this->y - rhs->y) < y_tol) && 
 				(abs(this->theta - rhs->theta) < theta_tol));		
@@ -61,11 +64,11 @@ struct Action
 	// Define your action Struct Here
 	uint8_t motion_index;
 	Action(uint8_t index):motion_index(index){}
-	friend ostream& operator<<(ostream& os, const Action* a)
-	{
-		os << to_string(a->motion_index) << " ";
-		return os;
-	}
+	// friend ostream& operator<<(ostream& os, const Action* a)
+	// {
+	// 	os << to_string(a->motion_index) << " ";
+	// 	return os;
+	// }
 };
 
 
@@ -75,12 +78,10 @@ struct Info
 	double turn_radius;
 	double arc_length;
 	double transition_cost;
-	double curr_z;
-	Info(double t_r = 0.0,double a_l = 0.0, double t_c =0.0, double z=0.0){
+	Info(double t_r = 0.0,double a_l = 0.0, double t_c =0.0){
 		this->turn_radius = t_r;
 		this->arc_length = a_l;
 		this->transition_cost = t_c;
-		this->curr_z = z;
 	}
 	// string toString() const
 	// {
@@ -92,15 +93,15 @@ struct Info
 class LatticeMotion 
 {
 public:
-	LatticeMotion(const vector<double>& turn_radius, double arc_length);
+	LatticeMotion(const vector<double>& turn_radius, double arc_length,KDTree* tree);
 	~LatticeMotion();
 
 	// some math
-	State* get_after_motion_pose(double radius);
-	State* to_global_frame(const State* global_state, const State* relative_state);
+	State* get_after_motion_pose(double radius,KDTree* tree);
+	State* to_global_frame(const State* global_state, const State* relative_state,KDTree* tree);
 
 	// getting the global successors
-	bool get_global_successors(const State* global_state,vector<tuple<State*,Action*,Info*>>& global_successors);
+	bool get_global_successors(const State* global_state,vector<tuple<State*,Action*,Info*>>& global_successors,KDTree* tree);
 
 	// no need for edit functions, just create another LatticeMotion object
 	// get functions
@@ -125,10 +126,12 @@ struct StateHasher
 
 		hash<string> hasher;
 		std::size_t seed = 3;
-		double x = n->x; double y = n->y; double theta = n->theta;
+		double x = n->x; double y = n->y; double theta = n->theta; double z = n->z;
+
 		seed ^= hasher(to_string(n->x))     + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 		seed ^= hasher(to_string(n->y))     + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 		seed ^= hasher(to_string(n->theta)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		
 		return seed;
 	}
 };
@@ -143,12 +146,10 @@ struct StateComparator
 // template<typename State,typename Action,typename Info>
 class a_star_search{
 public:
-	KDTree* tree = new KDTree("/home/divyak/Documents/Fall2018/Planning/Project/catkin_ws/src/scarab_planner/victoria_crater.xyz");	
-  	LatticeMotion* motion_handler = new LatticeMotion({1.0, 2.0, -2.0, -1.0}, 1.0);	
 	unordered_map<State*,tuple<State*,Action*,Info*>> came_from;
 	unordered_set<State*,StateHasher,StateComparator> visited;
 	double get_cost(State* current, State* next);
 	double get_heuristic(State* current,State* goal);
-	bool get_successors(State* current, vector<tuple<State*,Action*,Info*>>& successors);
-	bool get_plan(State* start,State* goal, vector<tuple<State*,Action*,Info*>>& path);
+	bool get_successors(State* current, vector<tuple<State*,Action*,Info*>>& successors,KDTree* tree,LatticeMotion* motionhandler);
+	bool get_plan(State* start,State* goal, vector<tuple<State*,Action*,Info*>>& path, KDTree* tree, LatticeMotion* motionhandler);
 };
