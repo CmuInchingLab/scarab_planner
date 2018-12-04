@@ -50,14 +50,15 @@ double mid_point = (max_val - min_val) / 2.0 - min_val;
 
 if (curr_value - min_val <= mid_point) {
 rgb.clear();
-rgb.push_back(255);
 rgb.push_back((curr_value - min_val) * 255 / mid_point);
+rgb.push_back(255);
 rgb.push_back(0);
 } else {
 rgb.clear();
-rgb.push_back((max_val - curr_value) * 255 / mid_point);
 rgb.push_back(255);
+rgb.push_back((max_val - curr_value) * 255 / mid_point);
 rgb.push_back(0);
+
 }
 
 // clip
@@ -79,12 +80,12 @@ int main(int argc, char **argv){
   //this is the a-star search from ricky's node
 
 
-  KDTree* tree = new KDTree("/home/divyak/Documents/Fall2018/Planning/Project/catkin_ws/src/scarab_planner/victoria_crater.xyz"); 
+  KDTree* tree = new KDTree("/home/korton/cmu/ScarabSim/catkin_ws/src/scarab_planner/victoria_crater.xyz");
   LatticeMotion* motion_handler = new LatticeMotion({1.0, 2.0, -2.0, -1.0}, 1.0,tree); 
 
 
   State* start = new State(0,0,0, tree);
-  State* goalfinal = new State(20, 0,0, tree); 
+  State* goalfinal = new State(150, 100,0, tree); 
 
 
   a_star_search* planner = new a_star_search();
@@ -157,7 +158,7 @@ int main(int argc, char **argv){
 
       // use the inching to change the colors of the arrows
       double curr_inching = (get<2>(path[goalindex]))->transition_cost; //this will need some multiplier
-      double max_val = 100; 
+      double max_val = 0.5; 
       double min_val = 0;
       vector<double> rgb =  interpolate_green2red(curr_inching, max_val, min_val);
       marker.color.r = rgb[0]; 
