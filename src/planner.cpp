@@ -78,15 +78,21 @@ int main(int argc, char **argv){
   ros::NodeHandle n;
 
   //this is the a-star search from ricky's node
-
-
-  KDTree* tree = new KDTree("/home/korton/cmu/ScarabSim/catkin_ws/src/scarab_planner/victoria_crater.xyz");
+  string kd_path; //path for the .xyz file that's loaded into kd tree
+  n.getParam("/tree_path", kd_path);
+  KDTree* tree = new KDTree(kd_path);
   LatticeMotion* motion_handler = new LatticeMotion({1.0, 2.0, -2.0, -1.0}, 1.0,tree); 
 
-
-  State* start = new State(0,0,0, tree);
-  State* goalfinal = new State(120, 100,2, tree); 
-
+  //set start and goal states (x, y, theta)
+  float start_x, start_y, start_theta, goal_x, goal_y, goal_theta;
+  n.getParam("/start_x", start_x);
+  n.getParam("/start_y", start_y);
+  n.getParam("/start_theta", start_theta);
+  n.getParam("/goal_x", goal_x);
+  n.getParam("/goal_y", goal_y);
+  n.getParam("/goal_theta", goal_theta);
+  State* start = new State(start_x, start_y, start_theta, tree);
+  State* goalfinal = new State(goal_x, goal_y, goal_theta, tree); 
 
   a_star_search* planner = new a_star_search();
   vector<tuple<State*,Action*,Info*>> path;

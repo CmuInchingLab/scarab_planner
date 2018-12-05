@@ -1,5 +1,15 @@
 <launch>
   <arg name="map" default="victoria"/> 
+
+  <!-- set start and goal states (x,y,theta)-->
+  <rosparam param="start_x"> -115 </rosparam>
+  <rosparam param="start_y"> 10 </rosparam>
+  <rosparam param="start_theta"> 0 </rosparam>
+
+  <rosparam param="goal_x"> 0 </rosparam>
+  <rosparam param="goal_y"> 40 </rosparam>
+  <rosparam param="goal_theta"> 2 </rosparam>
+
 <!--   <arg name="height" default="21"/>  -->
 
   <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
@@ -25,6 +35,8 @@
   <include file="$(find scarab_planner)/launch/rviz.launch">
     <arg name="model" value="$(find scarab_description)/urdf/terrain/$(arg map).urdf" />
   </include>
+
+  <rosparam param="tree_path" subst_value="True">$(find scarab_description)/meshes/terrain/$(arg map).xyz</rosparam>
   
   <!--<include file="$(find planner_to_control)/launch/planner_to_control.launch"/>-->	
 
